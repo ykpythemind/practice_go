@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"sync"
 )
@@ -30,6 +31,11 @@ func (r *request) get() {
 		return
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		r.err = fmt.Errorf("response code is not 200 (%d)", resp.StatusCode)
+		return
+	}
 
 	b, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
@@ -61,7 +67,7 @@ func (r *requester) Exec() {
 		wg.Add(1)
 		// execute request
 		go func(r *request, i int) {
-			fmt.Printf("try request / n=%d\n", i)
+			log.Printf("try request / n=%d\n", i)
 			r.get()
 
 			wg.Done()
